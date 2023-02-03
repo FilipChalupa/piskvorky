@@ -5,3 +5,17 @@
 ```bash
 npm install piskvorky
 ```
+
+## Usage
+
+```js
+import { findWinner } from 'piskvorky'
+
+const board = [
+	[0, 0, 1],
+	[2, 1, 2],
+	[2, 2, 1],
+]
+
+const winner = findWinner(board) // the winner is player 1
+```
