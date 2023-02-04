@@ -20,6 +20,7 @@ type PermissiveField =
 	| PermissivePlayer1Field
 	| PermissivePlayer2Field
 type Field = EmptyField | Player1Field | Player2Field
+type TieOfField = -1 | Field
 
 type PermissiveBoard =
 	| Readonly<PermissiveField[]>
@@ -147,23 +148,39 @@ const isWinningPosition = (board: Board, position: Position): boolean => {
 	return false
 }
 
-export const findWinner = (board: PermissiveBoard): Field => {
-	const validatedBoard = validateBoard(board)
-
+const findWinnerInternal = (board: Board): TieOfField => {
 	let winner: Field = 0
-	validatedBoard.some((row, y) =>
+	board.some((row, y) =>
 		row.some((_, x) => {
-			if (isWinningPosition(validatedBoard, { x, y })) {
-				winner = valueAt(validatedBoard, { x, y })
+			if (isWinningPosition(board, { x, y })) {
+				winner = valueAt(board, { x, y })
 				return true
 			}
 		}),
 	)
 
+	const tie = board.every((row, y) =>
+		row.every((_, x) => valueAt(board, { x, y }) !== 0),
+	)
+
+	if (tie) {
+		return -1
+	}
+
 	return winner
+}
+
+export const findWinner = (board: PermissiveBoard): TieOfField => {
+	const validatedBoard = validateBoard(board)
+
+	return findWinnerInternal(validatedBoard)
 }
 export const suggestNextMove = (board: PermissiveBoard): Position => {
 	const validatedBoard = validateBoard(board)
+
+	if (findWinnerInternal(validatedBoard) !== 0) {
+		throw new Error('Game is already over.')
+	}
 
 	return {
 		x: 1,

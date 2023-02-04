@@ -27,6 +27,14 @@ describe('Find winner', () => {
 			] as const
 			assert.equal(findWinner(board), 2)
 		})
+		it('should return -1', () => {
+			const board = [
+				[2, 1, 1],
+				[1, 1, 2],
+				[2, 2, 1],
+			] as const
+			assert.equal(findWinner(board), -1)
+		})
 	})
 	describe('Flat', () => {
 		it('should return 0', () => {
