@@ -154,7 +154,6 @@ export const findWinner = (board: PermissiveBoard): Field => {
 	validatedBoard.some((row, y) =>
 		row.some((_, x) => {
 			if (isWinningPosition(validatedBoard, { x, y })) {
-				console.log('winner', { x, y })
 				winner = valueAt(validatedBoard, { x, y })
 				return true
 			}

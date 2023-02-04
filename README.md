@@ -13,13 +13,13 @@ import { findWinner } from 'piskvorky'
 
 const board = [
 	[0, 0, 1],
-	[2, 1, 2],
+	[2, 1, 1],
 	[2, 2, 1],
 ]
 
 const winner = findWinner(board) // the winner is player 1
 
-const flatBoard = [0, 0, 1, 2, 1, 2, 2, 2, 1] // same as board.flat()
+const flatBoard = [0, 0, 1, 2, 1, 1, 2, 2, 1] // same as board.flat()
 
 const winnerOfFlatBoard = findWinner(flatBoard) // the winner is player 1
 ```
