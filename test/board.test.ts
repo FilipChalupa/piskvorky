@@ -1,5 +1,5 @@
 import assert from 'assert'
-import { findWinner } from './../src/board'
+import { findWinner, suggestNextMove } from './../src/board'
 
 describe('Find winner', () => {
 	describe('3x3', () => {
@@ -34,6 +34,16 @@ describe('Find winner', () => {
 				[2, 2, 1],
 			] as const
 			assert.equal(findWinner(board), -1)
+		})
+		it('should return next move position', () => {
+			const board = [
+				[2, 2, 0],
+				[2, 1, 1],
+				[1, 1, 0],
+			] as const
+			const nextMove = suggestNextMove(board)
+			assert.equal(nextMove.x, 2)
+			assert.ok([0, 2].includes(nextMove.y))
 		})
 	})
 	describe('Flat', () => {

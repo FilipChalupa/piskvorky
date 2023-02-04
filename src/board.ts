@@ -182,8 +182,15 @@ export const suggestNextMove = (board: PermissiveBoard): Position => {
 		throw new Error('Game is already over.')
 	}
 
-	return {
-		x: 1,
-		y: 2,
-	}
+	const emptyPositions: Position[] = []
+	validatedBoard.forEach((row, y) =>
+		row.forEach((_, x) => {
+			const position = { x, y }
+			if (valueAt(validatedBoard, position) === 0) {
+				emptyPositions.push(position)
+			}
+		}),
+	)
+
+	return emptyPositions[Math.floor(Math.random() * emptyPositions.length)]
 }

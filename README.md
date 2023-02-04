@@ -9,7 +9,7 @@ npm install piskvorky
 ## Usage
 
 ```js
-import { findWinner } from 'piskvorky'
+import { findWinner, suggestNextMove } from 'piskvorky'
 
 const board = [
 	[0, 0, 1],
@@ -22,6 +22,12 @@ const winner = findWinner(board) // the winner is player 1
 const flatBoard = [0, 0, 1, 2, 1, 1, 2, 2, 1] // same as board.flat()
 
 const winnerOfFlatBoard = findWinner(flatBoard) // the winner is player 1
+
+const nextMove = suggestNextMove([
+	[0, 0, 1],
+	[0, 1, 0],
+	[0, 2, 2],
+]) // the next move is [0, 1]
 ```
 
 ## Values
