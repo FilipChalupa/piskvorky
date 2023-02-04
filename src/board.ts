@@ -21,30 +21,44 @@ type PermissiveField =
 	| PermissivePlayer2Field
 type Field = EmptyField | Player1Field | Player2Field
 
-type PermissiveBoard = PermissiveField[][]
-type Board = Field[][]
+type PermissiveBoard =
+	| Readonly<PermissiveField[]>
+	| Readonly<Readonly<PermissiveField[]>[]>
+type Board = Readonly<Readonly<Field[]>[]>
 
 type Position = { x: number; y: number }
 
 const validateBoard = (board: PermissiveBoard): Board => {
-	if (!Array.isArray(board)) {
+	let normalizedBoard = board as any[]
+	if (!Array.isArray(normalizedBoard)) {
 		throw new Error('Board is not an array.')
 	}
-	if (board.length < 3) {
+	if (normalizedBoard.some((row) => !Array.isArray(row))) {
+		const size = Math.sqrt(normalizedBoard.length)
+		if (!Number.isInteger(size)) {
+			throw new Error('Board has invalid number of fields.')
+		}
+		normalizedBoard = new Array(size)
+			.fill(null)
+			.map((_, i) => normalizedBoard.slice(i * size, (i + 1) * size))
+	}
+	if (normalizedBoard.length < 3) {
 		throw new Error('Board has too few columns.')
 	}
-	if (!board.every((row) => Array.isArray(row))) {
+	if (!normalizedBoard.every((row) => Array.isArray(row))) {
 		throw new Error('Board rows must be arrays.')
 	}
-	if (!board.every((row) => row.length === board.length)) {
+	if (!normalizedBoard.every((row) => row.length === normalizedBoard.length)) {
 		throw new Error('Board must have same number of rows and columns.')
 	}
 	if (
-		!board.every((row) => row.every((field) => anyFieldValues.includes(field)))
+		!normalizedBoard.every((row) =>
+			row.every((field) => anyFieldValues.includes(field)),
+		)
 	) {
 		throw new Error('Board contains invalid field values.')
 	}
-	return board as Board
+	return normalizedBoard as Board
 }
 
 const valueIsEmpty = (value: PermissiveField) =>
@@ -67,7 +81,7 @@ const valueAt = (board: Board, position: Position): Field => {
 	if (y < 0 || y >= board.length) {
 		throw new Error('Position y is out of bounds.')
 	}
-	const value = board[x][y]
+	const value = board[y][x]
 	if (valueIsPlayer1(value)) {
 		return 1
 	}
@@ -86,7 +100,7 @@ const isWinningPosition = (board: Board, position: Position): boolean => {
 	}
 
 	const boardSize = board.length
-	const symbolsToWin = 5
+	const symbolsToWin = Math.min(5, board.length)
 
 	let i: number
 
@@ -137,8 +151,8 @@ export const findWinner = (board: PermissiveBoard): Field => {
 	const validatedBoard = validateBoard(board)
 
 	let winner: Field = 0
-	board.some((row, x) =>
-		row.some((_, y) => {
+	validatedBoard.some((row, y) =>
+		row.some((_, x) => {
 			if (isWinningPosition(validatedBoard, { x, y })) {
 				console.log('winner', { x, y })
 				winner = valueAt(validatedBoard, { x, y })
