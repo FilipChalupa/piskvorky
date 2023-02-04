@@ -23,3 +23,10 @@ const flatBoard = [0, 0, 1, 2, 1, 1, 2, 2, 1] // same as board.flat()
 
 const winnerOfFlatBoard = findWinner(flatBoard) // the winner is player 1
 ```
+
+## Values
+
+- `1` - player 1
+- `2` - player 2
+- `0` - empty field, no winner
+- `-1` - draw
