@@ -6,26 +6,32 @@ const anyFieldValues = [
 	...player1FieldValues,
 	...player2FieldValues,
 ] as const
+const emptyField = emptyFieldValues[0]
+const player1Value = player1FieldValues[0]
+const player2Value = player2FieldValues[0]
+const tieValue = -1
 
 type PermissiveEmptyField = (typeof emptyFieldValues)[number]
 type PermissivePlayer1Field = (typeof player1FieldValues)[number]
 type PermissivePlayer2Field = (typeof player2FieldValues)[number]
 
-type EmptyField = (typeof emptyFieldValues)[0]
-type Player1Field = (typeof player1FieldValues)[0]
-type Player2Field = (typeof player2FieldValues)[0]
+type EmptyField = typeof emptyField
+type Player1Field = typeof player1Value
+type Player2Field = typeof player2Value
+type AnyPlayerField = Player1Field | Player2Field
 
 type PermissiveField =
 	| PermissiveEmptyField
 	| PermissivePlayer1Field
 	| PermissivePlayer2Field
 type Field = EmptyField | Player1Field | Player2Field
-type TieOfField = -1 | Field
+type TieOfField = typeof tieValue | Field
 
 type PermissiveBoard =
 	| Readonly<PermissiveField[]>
 	| Readonly<Readonly<PermissiveField[]>[]>
 type Board = Readonly<Readonly<Field[]>[]>
+type WorkingBoard = Field[][]
 
 type Position = { x: number; y: number }
 
@@ -175,6 +181,132 @@ export const findWinner = (board: PermissiveBoard): TieOfField => {
 
 	return findWinnerInternal(validatedBoard)
 }
+
+const getEmptyPositions = (board: Board): Position[] => {
+	const emptyPositions: Position[] = []
+	board.forEach((row, y) =>
+		row.forEach((_, x) => {
+			const position = { x, y }
+			if (valueAt(board, position) === 0) {
+				emptyPositions.push(position)
+			}
+		}),
+	)
+	return emptyPositions
+}
+
+const copyBoard = (board: Board): WorkingBoard => {
+	return board.map((row) => [...row])
+}
+
+const otherPlayer = (player: AnyPlayerField): AnyPlayerField => {
+	if (valueIsPlayer1(player)) {
+		return player2Value
+	}
+	return player1Value
+}
+
+const getScore = (board: Board, player: AnyPlayerField): number => {
+	const winner = findWinnerInternal(board)
+	if (winner === player) {
+		return 100
+	}
+	if (winner === otherPlayer(player)) {
+		return 0
+	}
+	if (winner === tieValue) {
+		return 10
+	}
+	return 40
+}
+
+type Move = {
+	position: Position
+	score: number
+	nextMoveScore: number
+}
+
+const averageScore = (scores: number[]): number =>
+	scores.length === 0
+		? Number.NEGATIVE_INFINITY
+		: scores.reduce((sum, score) => sum + score, 0) / scores.length
+
+const getMoves = (
+	board: Board,
+	player: AnyPlayerField,
+	depth: number,
+): Move[] => {
+	if (depth === 0) {
+		return []
+	}
+	const emptyPositions = getEmptyPositions(board)
+	return emptyPositions.map((position) => {
+		const boardWithMove = copyBoard(board)
+		boardWithMove[position.y][position.x] = player
+		const emptyPositions = getEmptyPositions(board)
+		const winner = findWinnerInternal(boardWithMove)
+		const score = getScore(boardWithMove, player)
+		const nextMoveScores =
+			winner === 0
+				? emptyPositions.map((position) => {
+						const boardWithNextMove = copyBoard(boardWithMove)
+						boardWithNextMove[position.y][position.x] = otherPlayer(player)
+						const winner = findWinnerInternal(boardWithNextMove)
+						if (winner === otherPlayer(player)) {
+							return 0
+						}
+						const nextMoves = getMoves(boardWithNextMove, player, depth - 1)
+						return averageScore(nextMoves.map((move) => move.score))
+				  })
+				: []
+		return {
+			position,
+			score,
+			nextMoveScore: averageScore(nextMoveScores),
+		}
+	})
+}
+
+const getBestMove = (moves: Move[]): Position => {
+	const bestScore = moves.reduce(
+		(bestScore, move) => (move.score > bestScore ? move.score : bestScore),
+		Number.NEGATIVE_INFINITY,
+	)
+	const bestMoves = moves.filter((move) => move.score === bestScore)
+	const nextMoveBestScore = bestMoves.reduce(
+		(bestScore, move) =>
+			move.nextMoveScore > bestScore ? move.nextMoveScore : bestScore,
+		Number.NEGATIVE_INFINITY,
+	)
+	const bestMovesWithNextMoveBestScore = bestMoves.filter(
+		(move) => move.nextMoveScore === nextMoveBestScore,
+	)
+	return bestMovesWithNextMoveBestScore[
+		Math.floor(Math.random() * bestMovesWithNextMoveBestScore.length)
+	].position
+}
+
+const getCurrentPlayer = (board: Board): AnyPlayerField => {
+	let player1Moves = 0
+	let player2Moves = 0
+
+	board.forEach((row) =>
+		row.forEach((field) => {
+			if (valueIsPlayer1(field)) {
+				player1Moves++
+			}
+			if (valueIsPlayer2(field)) {
+				player2Moves++
+			}
+		}),
+	)
+
+	if (player1Moves > player2Moves) {
+		return player2Value
+	}
+	return player1Value
+}
+
 export const suggestNextMove = (board: PermissiveBoard): Position => {
 	const validatedBoard = validateBoard(board)
 
@@ -182,15 +314,13 @@ export const suggestNextMove = (board: PermissiveBoard): Position => {
 		throw new Error('Game is already over.')
 	}
 
-	const emptyPositions: Position[] = []
-	validatedBoard.forEach((row, y) =>
-		row.forEach((_, x) => {
-			const position = { x, y }
-			if (valueAt(validatedBoard, position) === 0) {
-				emptyPositions.push(position)
-			}
-		}),
-	)
+	console.time('Execution Time')
 
-	return emptyPositions[Math.floor(Math.random() * emptyPositions.length)]
+	const currentPlayer = getCurrentPlayer(validatedBoard)
+	const moves = getMoves(validatedBoard, currentPlayer, 1)
+	const bestMove = getBestMove(moves)
+
+	console.timeEnd('Execution Time')
+
+	return bestMove
 }
