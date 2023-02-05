@@ -10,7 +10,7 @@
 		"dev": "npm start",
 		"build": "rollup --configPlugin typescript -c",
 		"prepare": "npm run build",
-		"test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register test/**/*.test.ts"
+		"test": "mocha"
 	},
 	"repository": {
 		"type": "git",
