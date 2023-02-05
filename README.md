@@ -10,6 +10,7 @@ npm install piskvorky
 
 ```js
 import { findWinner, suggestNextMove } from 'piskvorky'
+// import { findWinner, suggestNextMove } from 'https://unpkg.com/piskvorky@latest'
 
 const board = [
 	[0, 0, 1],
