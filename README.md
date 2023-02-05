@@ -53,6 +53,9 @@ const response = await fetch(
 	'https://piskvorky.czechitas-podklady.cz/api/find-winner',
 	{
 		method: 'POST',
+		headers: {
+			'Content-type': 'application/json',
+		},
 		body: JSON.stringify({ board }),
 	},
 )
@@ -67,6 +70,9 @@ const response = await fetch(
 	'https://piskvorky.czechitas-podklady.cz/api/suggest-next-move',
 	{
 		method: 'POST',
+		headers: {
+			'Content-type': 'application/json',
+		},
 		body: JSON.stringify({
 			board: [
 				[0, 0, 1],
