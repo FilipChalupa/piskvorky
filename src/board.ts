@@ -353,7 +353,11 @@ export const suggestNextMove = (board: PermissiveBoard): Position => {
 	console.time('Execution Time')
 
 	const currentPlayer = getCurrentPlayer(validatedBoard)
-	const moves = getBestMoves(validatedBoard, currentPlayer, 1)
+	const moves = getBestMoves(
+		validatedBoard,
+		currentPlayer,
+		1 /* @TODO: increase this number without burning the CPU */,
+	)
 	const bestMove = getBestMovePosition(moves)
 
 	console.timeEnd('Execution Time')
