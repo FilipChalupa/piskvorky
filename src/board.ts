@@ -195,6 +195,35 @@ const getEmptyPositions = (board: Board): Position[] => {
 	return emptyPositions
 }
 
+const getEmptyAdjacentPositions = (board: Board): Position[] => {
+	return getEmptyPositions(board).filter((position) =>
+		[
+			{ x: 0, y: 1 },
+			{ x: 0, y: -1 },
+			{ x: 1, y: 0 },
+			{ x: -1, y: 0 },
+			{ x: 1, y: 1 },
+			{ x: 1, y: -1 },
+			{ x: -1, y: 1 },
+			{ x: -1, y: -1 },
+		].some((direction) => {
+			const adjacentPosition = {
+				x: position.x + direction.x,
+				y: position.y + direction.y,
+			}
+			if (
+				adjacentPosition.x < 0 ||
+				adjacentPosition.x >= board.length ||
+				adjacentPosition.y < 0 ||
+				adjacentPosition.y >= board.length
+			) {
+				return false
+			}
+			return valueAt(board, adjacentPosition) !== emptyField
+		}),
+	)
+}
+
 const copyBoard = (board: Board): WorkingBoard => {
 	return board.map((row) => [...row])
 }
@@ -206,7 +235,11 @@ const otherPlayer = (player: AnyPlayerField): AnyPlayerField => {
 	return player1Value
 }
 
-const getScore = (board: Board, player: AnyPlayerField): number => {
+const getScore = (
+	board: Board,
+	player: AnyPlayerField,
+	depth: number,
+): number => {
 	const winner = findWinnerInternal(board)
 	if (winner === player) {
 		return 100
@@ -217,13 +250,37 @@ const getScore = (board: Board, player: AnyPlayerField): number => {
 	if (winner === tieValue) {
 		return 10
 	}
-	return 40
+	if (depth === 0) {
+		return 40
+	}
+	const emptyPositions = getEmptyAdjacentPositions(board)
+	return averageScore(
+		emptyPositions
+			.map((position) => {
+				const boardWithMove = copyBoard(board)
+				boardWithMove[position.y][position.x] = otherPlayer(player)
+				const score = getScore(boardWithMove, player, 0)
+				const winner = findWinnerInternal(boardWithMove)
+				if (winner !== emptyField) {
+					return score
+				}
+				return getBestMoves(boardWithMove, player, depth - 1).map(
+					(move) => move.score,
+				)
+			})
+			.flat(),
+	)
 }
+
+const sortMovesByScore = (moves: Move[]): Move[] => {
+	return moves.sort((a, b) => b.score - a.score)
+}
+
+const shuffle = <T>(array: T[]): T[] => array.sort(() => 0.5 - Math.random())
 
 type Move = {
 	position: Position
 	score: number
-	nextMoveScore: number
 }
 
 const averageScore = (scores: number[]): number =>
@@ -231,7 +288,7 @@ const averageScore = (scores: number[]): number =>
 		? Number.NEGATIVE_INFINITY
 		: scores.reduce((sum, score) => sum + score, 0) / scores.length
 
-const getMoves = (
+const getBestMoves = (
 	board: Board,
 	player: AnyPlayerField,
 	depth: number,
@@ -239,51 +296,22 @@ const getMoves = (
 	if (depth === 0) {
 		return []
 	}
-	const emptyPositions = getEmptyPositions(board)
-	return emptyPositions.map((position) => {
+	const emptyPositions = getEmptyAdjacentPositions(board)
+	const moves: Move[] = emptyPositions.map((position) => {
 		const boardWithMove = copyBoard(board)
 		boardWithMove[position.y][position.x] = player
-		const emptyPositions = getEmptyPositions(board)
-		const winner = findWinnerInternal(boardWithMove)
-		const score = getScore(boardWithMove, player)
-		const nextMoveScores =
-			winner === 0
-				? emptyPositions.map((position) => {
-						const boardWithNextMove = copyBoard(boardWithMove)
-						boardWithNextMove[position.y][position.x] = otherPlayer(player)
-						const winner = findWinnerInternal(boardWithNextMove)
-						if (winner === otherPlayer(player)) {
-							return 0
-						}
-						const nextMoves = getMoves(boardWithNextMove, player, depth - 1)
-						return averageScore(nextMoves.map((move) => move.score))
-				  })
-				: []
-		return {
-			position,
-			score,
-			nextMoveScore: averageScore(nextMoveScores),
-		}
+		return { position, score: getScore(boardWithMove, player, depth) }
 	})
+	return sortMovesByScore(shuffle(moves)).slice(0, 8)
 }
 
-const getBestMove = (moves: Move[]): Position => {
+const getBestMovePosition = (moves: Move[]): Position => {
 	const bestScore = moves.reduce(
 		(bestScore, move) => (move.score > bestScore ? move.score : bestScore),
 		Number.NEGATIVE_INFINITY,
 	)
 	const bestMoves = moves.filter((move) => move.score === bestScore)
-	const nextMoveBestScore = bestMoves.reduce(
-		(bestScore, move) =>
-			move.nextMoveScore > bestScore ? move.nextMoveScore : bestScore,
-		Number.NEGATIVE_INFINITY,
-	)
-	const bestMovesWithNextMoveBestScore = bestMoves.filter(
-		(move) => move.nextMoveScore === nextMoveBestScore,
-	)
-	return bestMovesWithNextMoveBestScore[
-		Math.floor(Math.random() * bestMovesWithNextMoveBestScore.length)
-	].position
+	return bestMoves[Math.floor(Math.random() * bestMoves.length)].position
 }
 
 const getCurrentPlayer = (board: Board): AnyPlayerField => {
@@ -314,11 +342,19 @@ export const suggestNextMove = (board: PermissiveBoard): Position => {
 		throw new Error('Game is already over.')
 	}
 
+	// Empty board
+	if (
+		validatedBoard.every((row) => row.every((field) => field === emptyField))
+	) {
+		const middle = Math.floor(validatedBoard.length / 2)
+		return { x: middle, y: middle }
+	}
+
 	console.time('Execution Time')
 
 	const currentPlayer = getCurrentPlayer(validatedBoard)
-	const moves = getMoves(validatedBoard, currentPlayer, 1)
-	const bestMove = getBestMove(moves)
+	const moves = getBestMoves(validatedBoard, currentPlayer, 1)
+	const bestMove = getBestMovePosition(moves)
 
 	console.timeEnd('Execution Time')
 
