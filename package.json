@@ -1,7 +1,7 @@
 {
 	"name": "piskvorky",
 	"version": "0.0.8",
-	"description": "",
+	"description": "Helper functions for tic-tac-toe game.",
 	"type": "module",
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
