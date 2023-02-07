@@ -1,4 +1,4 @@
-# Piškvorky [![npm](https://img.shields.io/npm/v/piskvorky.svg)](https://www.npmjs.com/package/piskvorky) ![npm type definitions](https://img.shields.io/npm/types/piskvorky.svg)
+# Piškvorky (tic-tac-toe) [![npm](https://img.shields.io/npm/v/piskvorky.svg)](https://www.npmjs.com/package/piskvorky) ![npm type definitions](https://img.shields.io/npm/types/piskvorky.svg)
 
 Helper functions for tic-tac-toe game.
 
@@ -9,6 +9,25 @@ npm install piskvorky
 ```
 
 ## Usage
+
+### Functions
+
+#### `findWinner`
+
+Expects a 1D or 2D array of strings representing the board. Returns the winner (`'o'` or `'x'`), `'tie'` or `null` if there is no winner.
+
+| Value   | Description              |
+| ------- | ------------------------ |
+| `'o'`   | player O                 |
+| `'x'`   | player X                 |
+| `'_'`   | empty field              |
+|         |                          |
+| `'tie'` | tie                      |
+| `null`  | the game is not over yet |
+
+#### `suggestNextMove`
+
+Expects the board and current player (`'o'` or `'x'`). Returns a suggested move position calculated by a very sophisticated 🙃 AI.
 
 ### Package
 
