@@ -1,10 +1,4 @@
-import {
-	Board,
-	Field,
-	OutOfBoundsField,
-	outOfBoundsField,
-	Position,
-} from '../board'
+import { Board, Field, outOfBounds, OutOfBoundsField, Position } from '../board'
 
 export const valueAt = (
 	board: Board,
@@ -12,10 +6,10 @@ export const valueAt = (
 ): Field | OutOfBoundsField => {
 	const { x, y } = position
 	if (x < 0 || x >= board.length) {
-		return outOfBoundsField
+		return outOfBounds
 	}
 	if (y < 0 || y >= board.length) {
-		return outOfBoundsField
+		return outOfBounds
 	}
 	return board[y][x]
 }

@@ -23,6 +23,14 @@ describe('Find winner', () => {
 			] as const
 			assert.equal(findWinner(board), o)
 		})
+		it('should return o', () => {
+			const board = [
+				[x, x, o],
+				[x, o, o],
+				[o, o, x],
+			] as const
+			assert.equal(findWinner(board), o)
+		})
 		it('should return x', () => {
 			const board = [
 				[o, o, _],
