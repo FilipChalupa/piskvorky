@@ -1,6 +1,6 @@
-import { Board, empty, PlayerO, PlayerX, Position } from '../board'
 import { findWinner as findWinnerInternal } from './findWinner'
 import { valueAt } from './valueAt'
+import { Board, empty, PlayerO, PlayerX, Position } from './values'
 
 export const findBestMove = (
 	board: Board,

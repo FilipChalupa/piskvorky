@@ -1,4 +1,4 @@
-import { Board, empty, FlatBoard, playerO, playerX } from '../board'
+import { Board, empty, FlatBoard, playerO, playerX } from './values'
 
 export const validateBoard = (board: Board | FlatBoard): Board => {
 	let normalizedBoard = board as unknown[]

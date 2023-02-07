@@ -1,4 +1,4 @@
-import { Board, Field, outOfBounds, OutOfBoundsField, Position } from '../board'
+import { Board, Field, outOfBounds, OutOfBoundsField, Position } from './values'
 
 export const valueAt = (
 	board: Board,

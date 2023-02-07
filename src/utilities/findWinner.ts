@@ -1,3 +1,4 @@
+import { valueAt } from './valueAt'
 import {
 	Board,
 	empty,
@@ -9,8 +10,7 @@ import {
 	Tie,
 	tie,
 	Winner,
-} from '../board'
-import { valueAt } from './valueAt'
+} from './values'
 
 const findWinnerInDirection = (
 	board: Board,
