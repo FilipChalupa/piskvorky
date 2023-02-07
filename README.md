@@ -16,21 +16,21 @@ npm install piskvorky
 import { findWinner, suggestNextMove } from 'piskvorky'
 
 const board = [
-	[0, 0, 1],
-	[2, 1, 1],
-	[2, 2, 1],
+	['_', '_', 'o'],
+	['x', 'o', 'o'],
+	['x', 'x', 'o'],
 ]
 
-const winner = findWinner(board) // the winner is player 1
+const winner = findWinner(board) // the winner is player 'o'
 
-const flatBoard = [0, 0, 1, 2, 1, 1, 2, 2, 1] // same as board.flat()
+const flatBoard = ['_', '_', 'o', 'x', 'o', 'o', 'x', 'x', 'o'] // same as board.flat()
 
-const winnerOfFlatBoard = findWinner(flatBoard) // the winner is player 1
+const winnerOfFlatBoard = findWinner(flatBoard) // the winner is player 'o'
 
 const nextMove = suggestNextMove([
-	[1, 2, 1],
-	[0, 1, 2],
-	[2, 1, 2],
+	['o', 'x', 'o'],
+	['_', 'o', 'x'],
+	['x', 'o', 'x'],
 ]) // the next move is {x: 0, y: 1}
 ```
 
@@ -46,9 +46,9 @@ import { findWinner, suggestNextMove } from 'https://unpkg.com/piskvorky@latest'
 
 ```js
 const board = [
-	[0, 0, 1],
-	[2, 1, 1],
-	[2, 2, 1],
+	['_', '_', 'o'],
+	['x', 'o', 'o'],
+	['x', 'x', 'o'],
 ]
 
 const response = await fetch(
@@ -61,8 +61,8 @@ const response = await fetch(
 		body: JSON.stringify({ board }),
 	},
 )
-const { winner, error: winnerError } = await response.json()
-console.log({ winner, winnerError })
+const { winner, error } = await response.json()
+console.log({ winner, error })
 ```
 
 #### Suggest next move
@@ -77,20 +77,14 @@ const response = await fetch(
 		},
 		body: JSON.stringify({
 			board: [
-				[0, 0, 1],
-				[0, 1, 0],
-				[0, 2, 2],
+				['_', '_', 'o'],
+				['_', 'o', '_'],
+				['_', 'x', 'x'],
 			],
+			player: 'o',
 		}),
 	},
 )
-const { position, error: positionError } = await response.json()
-console.log({ position, positionError })
+const { position, error } = await response.json()
+console.log({ position, error })
 ```
-
-## Values
-
-- `1` - player 1
-- `2` - player 2
-- `0` - empty field, no winner
-- `-1` - draw

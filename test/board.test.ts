@@ -1,55 +1,59 @@
 import assert from 'assert'
-import { findWinner, suggestNextMove } from './../src/board'
+import { findWinner, suggestNextMove } from '../src/board'
+
+const _ = '_' as const
+const o = 'o' as const
+const x = 'x' as const
 
 describe('Find winner', () => {
 	describe('3x3', () => {
-		it('should return 0', () => {
+		it('should return null', () => {
 			const board = [
-				[0, 0, 1],
-				[0, 1, 2],
-				[2, 2, 1],
+				[_, _, o],
+				[_, o, x],
+				[x, x, o],
 			] as const
-			assert.equal(findWinner(board), 0)
+			assert.equal(findWinner(board), null)
 		})
-		it('should return 1', () => {
+		it('should return o', () => {
 			const board = [
-				[2, 2, 0],
-				[2, 1, 0],
-				[1, 1, 1],
+				[x, x, _],
+				[x, o, _],
+				[o, o, o],
 			] as const
-			assert.equal(findWinner(board), 1)
+			assert.equal(findWinner(board), o)
 		})
-		it('should return 2', () => {
+		it('should return x', () => {
 			const board = [
-				[1, 1, 0],
-				[1, 2, 0],
-				[2, 2, 2],
+				[o, o, _],
+				[o, x, _],
+				[x, x, x],
 			] as const
-			assert.equal(findWinner(board), 2)
+			assert.equal(findWinner(board), x)
 		})
-		it('should return -1', () => {
+		it('should return tie', () => {
 			const board = [
-				[2, 1, 1],
-				[1, 1, 2],
-				[2, 2, 1],
+				[x, o, o],
+				[o, o, x],
+				[x, x, o],
 			] as const
-			assert.equal(findWinner(board), -1)
+			assert.equal(findWinner(board), 'tie')
 		})
 		it('should return next move position', () => {
 			const board = [
-				[2, 2, 0],
-				[2, 1, 1],
-				[1, 1, 0],
+				[x, x, _],
+				[x, o, o],
+				[o, o, _],
 			] as const
-			const nextMove = suggestNextMove(board)
+			const nextMove = suggestNextMove(board, x)
 			assert.equal(nextMove.x, 2)
 			assert.ok([0, 2].includes(nextMove.y))
 		})
 	})
 	describe('Flat', () => {
-		it('should return 0', () => {
-			const board = [0, 0, 1, 0, 1, 2, 2, 2, 1] as const
-			assert.equal(findWinner(board), 0)
+		it('should return null', () => {
+			const board = [_, _, o, _, o, x, x, x, o] as const
+			assert.equal(findWinner(board), null)
 		})
 	})
 })
