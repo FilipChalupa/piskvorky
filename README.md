@@ -29,6 +29,8 @@ Expects a 1D or 2D array of strings representing the board. Returns the winner (
 
 Expects the board and current player (`'o'` or `'x'`). Returns a suggested move position calculated by a very sophisticated 🙃 AI.
 
+---
+
 ### Package
 
 ```js
@@ -58,6 +60,8 @@ const nextMove = suggestNextMove([
 ```js
 import { findWinner, suggestNextMove } from 'https://unpkg.com/piskvorky@latest'
 ```
+
+---
 
 ### Online api
 
